@@ -1,0 +1,40 @@
+name: Matrix Calculator CI
+
+on: [push, pull_request]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y make doxygen graphviz valgrind
+        
+    - name: Build application
+      run: |
+        make all
+        
+    - name: Run tests
+      run: ./matrix_test
+      
+    - name: Generate documentation
+      run: |
+        doxygen Doxyfile
+        ls -la docs/html/ || echo "Documentation not generated"
+      
+    - name: Check memory leaks with Valgrind
+      run: |
+        valgrind --leak-check=full --error-exitcode=1 ./matrix_test
+        
+    - name: Build Docker image
+      run: |
+        docker build -t matrix-calculator .
+        
+    - name: Test Docker container
+      run: |
+        docker run --rm matrix-calculator
