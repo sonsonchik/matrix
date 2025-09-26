@@ -1,0 +1,5 @@
+matrix_calc
+matrix_test
+docs/
+*.o
+.DS_Store
